@@ -4,7 +4,7 @@ import trayIconAsset from "../../assets/desktop/icon.png?asset";
 import macOsTrayIconAsset from "../../assets/desktop/iconTemplate.png?asset";
 import { version } from "../../package.json";
 
-import { mainWindow, quitApp } from "./window";
+import { mainWindow, openServerPicker, quitApp } from "./window";
 
 // internal tray state
 let tray: Tray = null;
@@ -51,6 +51,12 @@ export function updateTrayMenu() {
             enabled: false,
           },
         ]),
+      },
+      { type: "separator" },
+      {
+        label: "Switch Server",
+        type: "normal",
+        click: openServerPicker,
       },
       { type: "separator" },
       {

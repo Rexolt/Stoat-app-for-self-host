@@ -28,6 +28,15 @@ const schema = {
   discordRpc: {
     type: "boolean",
   } as JSONSchema.Boolean,
+  serverUrl: {
+    type: "string",
+  } as JSONSchema.String,
+  recentServers: {
+    type: "array",
+    items: {
+      type: "string",
+    } as JSONSchema.String,
+  } as JSONSchema.Array,
   windowState: {
     type: "object",
     properties: {
@@ -60,6 +69,8 @@ const store = new Store({
     spellchecker: true,
     hardwareAcceleration: true,
     discordRpc: true,
+    serverUrl: "",
+    recentServers: [],
     windowState: {
       x: 0,
       y: 0,
@@ -83,6 +94,8 @@ class Config {
       spellchecker: this.spellchecker,
       hardwareAcceleration: this.hardwareAcceleration,
       discordRpc: this.discordRpc,
+      serverUrl: this.serverUrl,
+      recentServers: this.recentServers,
       windowState: this.windowState,
     });
   }
@@ -186,6 +199,34 @@ class Config {
 
     (store as never as { set(k: string, value: boolean): void }).set(
       "discordRpc",
+      value,
+    );
+
+    this.sync();
+  }
+
+  get serverUrl() {
+    return (store as never as { get(k: string): string }).get("serverUrl");
+  }
+
+  set serverUrl(value: string) {
+    (store as never as { set(k: string, value: string): void }).set(
+      "serverUrl",
+      value,
+    );
+
+    this.sync();
+  }
+
+  get recentServers() {
+    return (store as never as { get(k: string): string[] }).get(
+      "recentServers",
+    );
+  }
+
+  set recentServers(value: string[]) {
+    (store as never as { set(k: string, value: string[]): void }).set(
+      "recentServers",
       value,
     );
 

@@ -12,6 +12,7 @@ import {
 } from "electron";
 
 import windowIconAsset from "../../assets/desktop/icon.png?asset";
+import serverPickerHtml from "../serverPicker/picker.html?raw";
 
 import { config } from "./config";
 import { updateTrayMenu } from "./tray";
@@ -19,12 +20,102 @@ import { updateTrayMenu } from "./tray";
 // global reference to main window
 export let mainWindow: BrowserWindow;
 
-// currently in-use build
-export const BUILD_URL = new URL(
-  app.commandLine.hasSwitch("force-server")
-    ? app.commandLine.getSwitchValue("force-server")
-    : /*MAIN_WINDOW_VITE_DEV_SERVER_URL ??*/ "https://stoat.chat/app",
-);
+// the official, default server the app ships with
+export const DEFAULT_SERVER = "https://stoat.chat/app";
+
+/**
+ * Resolve the server URL the app should connect to.
+ *
+ * Priority: `--force-server` CLI flag > user-configured server > default.
+ */
+export function getServerUrl(): string {
+  if (app.commandLine.hasSwitch("force-server")) {
+    return app.commandLine.getSwitchValue("force-server");
+  }
+
+  return config.serverUrl || DEFAULT_SERVER;
+}
+
+/**
+ * Currently in-use build URL.
+ */
+export function getBuildUrl(): URL {
+  return new URL(getServerUrl());
+}
+
+/**
+ * Whether the user has explicitly chosen a server yet.
+ */
+function hasChosenServer(): boolean {
+  return (
+    app.commandLine.hasSwitch("force-server") || Boolean(config.serverUrl)
+  );
+}
+
+/**
+ * Load the inline server picker page into the main window.
+ */
+function loadServerPicker() {
+  mainWindow.loadURL(
+    "data:text/html;charset=utf-8," + encodeURIComponent(serverPickerHtml),
+  );
+}
+
+/**
+ * Load the configured server, or the picker if none has been chosen.
+ */
+function loadEntrypoint() {
+  if (hasChosenServer()) {
+    mainWindow.loadURL(getBuildUrl().toString());
+  } else {
+    loadServerPicker();
+  }
+}
+
+/**
+ * Persist the chosen server and connect to it.
+ */
+function selectServer(rawUrl: string) {
+  let url: URL;
+  try {
+    url = new URL(rawUrl);
+  } catch {
+    return;
+  }
+
+  const normalised = url.toString().replace(/\/$/, "");
+
+  // remember the server in the recent list (most-recent first, max 5)
+  const recent = [
+    normalised,
+    ...(config.recentServers ?? []).filter((s) => s !== normalised),
+  ].slice(0, 5);
+  config.recentServers = recent;
+
+  config.serverUrl = normalised;
+  mainWindow.loadURL(getBuildUrl().toString());
+}
+
+// register server IPC handlers once
+ipcMain.on("getServerInfo", (event) => {
+  event.returnValue = {
+    current: config.serverUrl,
+    default: DEFAULT_SERVER,
+    recent: config.recentServers ?? [],
+  };
+});
+ipcMain.on("selectServer", (_, url: string) => selectServer(url));
+ipcMain.on("openServerPicker", () => openServerPicker());
+
+/**
+ * Show the server picker so the user can switch servers.
+ */
+export function openServerPicker() {
+  if (!mainWindow) return;
+  mainWindow.show();
+  mainWindow.focus();
+  loadServerPicker();
+}
 
 // internal window state
 let shouldQuit = false;
@@ -85,8 +176,8 @@ export function createMainWindow() {
     mainWindow.maximize();
   }
 
-  // load the entrypoint
-  mainWindow.loadURL(BUILD_URL.toString());
+  // load the entrypoint (configured server, or the picker)
+  loadEntrypoint();
 
   // minimise window to tray
   mainWindow.on("close", (event) => {
