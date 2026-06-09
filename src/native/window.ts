@@ -13,6 +13,7 @@ import {
 
 import windowIconAsset from "../../assets/desktop/icon.png?asset";
 import serverPickerHtml from "../serverPicker/picker.html?raw";
+import themeCss from "./theme.css?raw";
 
 import { config } from "./config";
 import { updateTrayMenu } from "./tray";
@@ -231,11 +232,66 @@ export function createMainWindow() {
     ) {
       event.preventDefault();
       mainWindow.webContents.reload();
+    } else if (input.control && input.shift && input.key.toLowerCase() === "s") {
+      event.preventDefault();
+      openServerPicker();
     }
   });
 
-  // send the config
-  mainWindow.webContents.on("did-finish-load", () => config.sync());
+  // send the config and inject premium theme stylesheet
+  mainWindow.webContents.on("did-finish-load", () => {
+    config.sync();
+    mainWindow.webContents.insertCSS(themeCss);
+
+    // Inject floating Server Picker button in the bottom-left corner
+    const injectJs = `
+      (function() {
+        if (!window.serverManager || document.getElementById('floating-server-picker-btn')) return;
+        const btn = document.createElement('div');
+        btn.id = 'floating-server-picker-btn';
+        btn.title = 'Switch Server / Szerverválasztó (Ctrl+Shift+S)';
+        btn.innerHTML = \`<svg viewBox="0 0 24 24" width="20" height="20"><path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z" fill="currentColor"/></svg>\`;
+        Object.assign(btn.style, {
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          width: '40px',
+          height: '40px',
+          borderRadius: '10px',
+          background: 'rgba(30, 30, 30, 0.75)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(20px)',
+          webkitBackdropFilter: 'blur(20px)',
+          color: '#9e9e9e',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: '999999',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: 'auto'
+        });
+        btn.addEventListener('mouseenter', () => {
+          btn.style.color = '#fd6671';
+          btn.style.background = 'rgba(253, 102, 113, 0.1)';
+          btn.style.borderColor = 'rgba(253, 102, 113, 0.3)';
+          btn.style.transform = 'scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.color = '#9e9e9e';
+          btn.style.background = 'rgba(30, 30, 30, 0.75)';
+          btn.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+          btn.style.transform = 'scale(1)';
+        });
+        btn.addEventListener('click', () => {
+          window.serverManager.openPicker();
+        });
+        document.body.appendChild(btn);
+      })();
+    `;
+    mainWindow.webContents.executeJavaScript(injectJs);
+  });
 
   // configure spellchecker context menu
   mainWindow.webContents.on("context-menu", (_, params) => {
