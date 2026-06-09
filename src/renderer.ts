@@ -30,3 +30,52 @@ import "./index.css";
 console.log(
   '👋 This message is being logged by "renderer.ts", included via Vite',
 );
+
+interface ExtendedWindow extends Window {
+  native?: {
+    versions: {
+      node: () => string;
+      chrome: () => string;
+      electron: () => string;
+      desktop: () => string;
+    };
+    minimise: () => void;
+    maximise: () => void;
+    close: () => void;
+  };
+}
+
+const extWindow = window as unknown as ExtendedWindow;
+
+// Wait for DOM content to be loaded
+document.addEventListener("DOMContentLoaded", () => {
+  const native = extWindow.native;
+
+  // Set up version values
+  if (native && native.versions) {
+    const desktopVer = document.getElementById("ver-desktop");
+    const electronVer = document.getElementById("ver-electron");
+    const chromeVer = document.getElementById("ver-chrome");
+    const nodeVer = document.getElementById("ver-node");
+
+    if (desktopVer) desktopVer.textContent = "v" + native.versions.desktop();
+    if (electronVer) electronVer.textContent = "v" + native.versions.electron();
+    if (chromeVer) chromeVer.textContent = "v" + native.versions.chrome();
+    if (nodeVer) nodeVer.textContent = "v" + native.versions.node();
+  }
+
+  // Set up window titlebar controls
+  const titlebar = document.getElementById("titlebar");
+  const winMinimise = document.getElementById("win-minimise");
+  const winMaximise = document.getElementById("win-maximise");
+  const winClose = document.getElementById("win-close");
+
+  if (native && titlebar) {
+    document.body.classList.add("has-custom-titlebar");
+    titlebar.style.display = "flex";
+
+    if (winMinimise) winMinimise.addEventListener("click", () => native.minimise());
+    if (winMaximise) winMaximise.addEventListener("click", () => native.maximise());
+    if (winClose) winClose.addEventListener("click", () => native.close());
+  }
+});

@@ -139,7 +139,7 @@ export function createMainWindow() {
     minHeight: 300,
     width: 1280,
     height: 720,
-    backgroundColor: "#191919",
+    backgroundColor: "#141414",
     frame: !config.customFrame,
     icon: windowIcon,
     show: !startHidden,
