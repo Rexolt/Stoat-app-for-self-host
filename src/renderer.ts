@@ -42,6 +42,7 @@ interface ExtendedWindow extends Window {
     minimise: () => void;
     maximise: () => void;
     close: () => void;
+    useCustomFrame: () => boolean;
   };
 }
 
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const winMaximise = document.getElementById("win-maximise");
   const winClose = document.getElementById("win-close");
 
-  if (native && titlebar) {
+  if (native && titlebar && native.useCustomFrame()) {
     document.body.classList.add("has-custom-titlebar");
     titlebar.style.display = "flex";
 

@@ -552,8 +552,8 @@
       const winMaximise = document.getElementById("win-maximise");
       const winClose = document.getElementById("win-close");
 
-      // Initialize window controls if running inside Electron frame
-      if (window.native) {
+      // Initialize window controls if running inside a frameless Electron window
+      if (window.native && window.native.useCustomFrame()) {
         document.body.classList.add("has-custom-titlebar");
         titlebar.style.display = "flex";
         winMinimise.addEventListener("click", () => window.native.minimise());

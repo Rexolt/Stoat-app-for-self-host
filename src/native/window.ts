@@ -107,6 +107,10 @@ ipcMain.on("getServerInfo", (event) => {
 });
 ipcMain.on("selectServer", (_, url: string) => selectServer(url));
 ipcMain.on("openServerPicker", () => openServerPicker());
+// expose whether the custom (frameless) titlebar is in use, synchronously
+ipcMain.on("useCustomFrame", (event) => {
+  event.returnValue = config.customFrame;
+});
 
 /**
  * Show the server picker so the user can switch servers.
@@ -241,6 +245,10 @@ export function createMainWindow() {
   // send the config and inject premium theme stylesheet
   mainWindow.webContents.on("did-finish-load", () => {
     config.sync();
+
+    // the local server picker is self-styled; skip injecting chat theming
+    if (mainWindow.webContents.getURL().startsWith("data:")) return;
+
     mainWindow.webContents.insertCSS(themeCss);
 
     // Inject floating Server Picker button in the bottom-left corner

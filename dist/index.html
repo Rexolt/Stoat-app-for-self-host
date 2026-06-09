@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stoat Desktop</title>
+  <script type="module" crossorigin src="/assets/index-DibM_Zlt.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Rk5voWtj.css">
+</head>
+
+<body>
+  <!-- Background glows -->
+  <div class="bg-glow top-left"></div>
+  <div class="bg-glow bottom-right"></div>
+
+  <!-- Title Bar with Window Controls -->
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-logo">
+      <svg class="logo-svg" viewBox="0 0 32 32">
+        <path d="M16 4C14.5 4 13 5.5 13 7C13 8.5 14.5 10 16 10C17.5 10 19 8.5 19 7C19 5.5 17.5 4 16 4Z"
+          fill="currentColor" />
+        <path d="M9 7C7.5 7 6 8.5 6 10C6 11.5 7.5 13 9 13C10.5 13 12 11.5 12 10C12 8.5 10.5 7 9 7Z"
+          fill="currentColor" />
+        <path d="M23 7C21.5 7 20 8.5 20 10C20 11.5 21.5 13 23 13C24.5 13 26 11.5 26 10C26 8.5 24.5 7 23 7Z"
+          fill="currentColor" />
+        <path d="M16 12C11 12 7 16.5 7 22C7 25 10.5 28 16 28C21.5 28 25 25 25 22C25 16.5 21 12 16 12Z"
+          fill="currentColor" />
+      </svg>
+      <span class="titlebar-title">Stoat</span>
+    </div>
+    <div class="window-controls">
+      <button class="win-btn minimise" id="win-minimise" title="Minimize">
+        <svg viewBox="0 0 10 10">
+          <rect y="5" width="10" height="1" fill="currentColor" />
+        </svg>
+      </button>
+      <button class="win-btn maximise" id="win-maximise" title="Maximize">
+        <svg viewBox="0 0 10 10">
+          <rect x="1" y="1" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <button class="win-btn close" id="win-close" title="Close">
+        <svg viewBox="0 0 10 10">
+          <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Central Card -->
+  <div class="card">
+    <div class="logo-container">
+      <div class="brand-logo">
+        <svg class="brand-logo-svg" viewBox="0 0 32 32">
+          <path d="M16 4C14.5 4 13 5.5 13 7C13 8.5 14.5 10 16 10C17.5 10 19 8.5 19 7C19 5.5 17.5 4 16 4Z"
+            fill="currentColor" />
+          <path d="M9 7C7.5 7 6 8.5 6 10C6 11.5 7.5 13 9 13C10.5 13 12 11.5 12 10C12 8.5 10.5 7 9 7Z"
+            fill="currentColor" />
+          <path d="M23 7C21.5 7 20 8.5 20 10C20 11.5 21.5 13 23 13C24.5 13 26 11.5 26 10C26 8.5 24.5 7 23 7Z"
+            fill="currentColor" />
+          <path d="M16 12C11 12 7 16.5 7 22C7 25 10.5 28 16 28C21.5 28 25 25 25 22C25 16.5 21 12 16 12Z"
+            fill="currentColor" />
+        </svg>
+      </div>
+      <h1 class="brand-title">Stoat Chat</h1>
+      <p class="subtitle">Open source, user-first chat application.</p>
+    </div>
+
+    <!-- Animated loading bar -->
+    <div class="loader-container">
+      <div class="loader-bar"></div>
+      <div class="loader-status">Preparing application...</div>
+    </div>
+
+    <!-- Version details grid -->
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Client</span>
+        <span class="info-value" id="ver-desktop">v1.3.0</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Electron</span>
+        <span class="info-value" id="ver-electron">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Chrome</span>
+        <span class="info-value" id="ver-chrome">-</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Node</span>
+        <span class="info-value" id="ver-node">-</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
