@@ -1,332 +1,641 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choose a server</title>
-    <style>
-      :root {
-        --bg: #191919;
-        --surface: #242424;
-        --surface-hover: #2e2e2e;
-        --border: #353535;
-        --accent: #fd6671;
-        --accent-hover: #ff7a84;
-        --text: #f5f5f5;
-        --text-dim: #9a9a9a;
-        --error: #ff5c5c;
-      }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Choose a server</title>
+  <style>
+    :root {
+      --bg: #141414;
+      --surface: #1e1e1e;
+      --surface-hover: #282828;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #fd6671;
+      --accent-hover: #ff7a84;
+      --text: #f5f5f5;
+      --text-dim: #9e9e9e;
+      --error: #ff5c5c;
+    }
 
-      html,
-      body {
-        height: 100%;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      body {
-        background: var(--bg);
-        color: var(--text);
-        font-family:
-          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-      }
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
 
-      .card {
-        width: 100%;
-        max-width: 440px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 32px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-      }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      transition: padding-top 0.2s ease;
+    }
 
-      h1 {
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 6px;
-      }
+    body.has-custom-titlebar {
+      padding-top: 56px;
+    }
 
-      .subtitle {
-        font-size: 14px;
-        color: var(--text-dim);
-        margin-bottom: 24px;
-        line-height: 1.5;
-      }
+    /* Background Glowing Blobs */
+    .bg-glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: 1;
+      opacity: 0.12;
+      pointer-events: none;
+    }
 
-      .label {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--text-dim);
-        margin-bottom: 8px;
-      }
+    .bg-glow.top-left {
+      top: -150px;
+      left: -150px;
+      background: var(--accent);
+    }
 
-      .official-btn {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        background: var(--surface-hover);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 14px 16px;
-        color: var(--text);
-        font-size: 15px;
-        font-weight: 600;
-        cursor: pointer;
-        transition:
-          border-color 0.15s ease,
-          background 0.15s ease;
-      }
+    .bg-glow.bottom-right {
+      bottom: -150px;
+      right: -150px;
+      background: #8149bc;
+    }
 
-      .official-btn:hover {
-        border-color: var(--accent);
-        background: #313131;
-      }
+    /* Custom Title Bar */
+    .titlebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 38px;
+      background: rgba(20, 24, 24, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      z-index: 1000;
+      -webkit-app-region: drag;
+      user-select: none;
+    }
 
-      .official-btn .host {
-        font-size: 12px;
-        font-weight: 400;
-        color: var(--text-dim);
-      }
+    .titlebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      opacity: 0.85;
+    }
 
-      .divider {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 24px 0;
-        color: var(--text-dim);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-      }
+    .logo-svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
 
-      .divider::before,
-      .divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-      }
+    .window-controls {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      -webkit-app-region: no-drag;
+    }
 
-      input[type="text"] {
-        width: 100%;
-        background: var(--bg);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 13px 14px;
-        color: var(--text);
-        font-size: 15px;
-        outline: none;
-        transition: border-color 0.15s ease;
-      }
+    .win-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
 
-      input[type="text"]:focus {
-        border-color: var(--accent);
-      }
+    .win-btn svg {
+      width: 10px;
+      height: 10px;
+    }
 
-      input[type="text"]::placeholder {
-        color: #5e5e5e;
-      }
+    .win-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
 
-      .connect-btn {
-        width: 100%;
-        margin-top: 12px;
-        background: var(--accent);
-        border: none;
-        border-radius: 10px;
-        padding: 13px 16px;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 0.15s ease;
-      }
+    .win-btn.close:hover {
+      background: #e81123 !important;
+      color: #fff !important;
+    }
 
-      .connect-btn:hover {
-        background: var(--accent-hover);
-      }
+    /* Glassmorphic Central Card */
+    .card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(30, 30, 30, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 10;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-      .connect-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #fff, #dfdfdf);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-      .error {
-        color: var(--error);
-        font-size: 13px;
-        margin-top: 10px;
-        min-height: 18px;
-      }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
 
-      .recent {
-        margin-top: 24px;
-      }
+    .label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
 
-      .recent-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        width: 100%;
-        background: transparent;
-        border: none;
-        border-radius: 8px;
-        padding: 9px 10px;
-        color: var(--text-dim);
-        font-size: 13px;
-        cursor: pointer;
-        text-align: left;
-        transition: background 0.15s ease, color 0.15s ease;
-      }
+    /* Official Server Row styling */
+    .official-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      cursor: pointer;
+      transition:
+        border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-      .recent-item:hover {
-        background: var(--surface-hover);
-        color: var(--text);
-      }
+    .official-btn:hover {
+      border-color: rgba(253, 102, 113, 0.4);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
 
-      .hint {
-        font-size: 12px;
-        color: var(--text-dim);
-        margin-top: 8px;
-        line-height: 1.5;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <h1>Choose your server</h1>
-      <p class="subtitle">
-        Connect to the official Stoat instance or sign in to your own
-        self-hosted server.
-      </p>
+    .official-btn:active {
+      transform: translateY(1px);
+    }
 
-      <span class="label">Official</span>
-      <button class="official-btn" id="official">
-        <span>Stoat</span>
-        <span class="host" id="official-host"></span>
+    .official-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .official-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(253, 102, 113, 0.12);
+      color: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .official-btn:hover .official-icon {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .official-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .official-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+    }
+
+    .official-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .official-btn .host {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+
+    .official-arrow {
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .official-btn:hover .official-arrow {
+      color: var(--text);
+      transform: translateX(3px);
+    }
+
+    /* Divider styling */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 26px 0;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Input styling with link icon */
+    .input-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+      transition: color 0.15s ease;
+    }
+
+    .input-container input[type="text"] {
+      width: 100%;
+      background: rgba(10, 10, 10, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 13px 14px 13px 42px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .input-container input[type="text"]:focus {
+      border-color: var(--accent);
+      background: rgba(10, 10, 10, 0.75);
+      box-shadow: 0 0 0 3px rgba(253, 102, 113, 0.15);
+    }
+
+    .input-container input[type="text"]:focus~.input-icon {
+      color: var(--accent);
+    }
+
+    .input-container input[type="text"]::placeholder {
+      color: #4e4e4e;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Submit button styling */
+    .connect-btn {
+      width: 100%;
+      margin-top: 14px;
+      background: linear-gradient(135deg, var(--accent), #ff7a84);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(253, 102, 113, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .connect-btn:hover:not(:disabled) {
+      filter: brightness(1.05);
+      box-shadow: 0 6px 20px rgba(253, 102, 113, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .connect-btn:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(253, 102, 113, 0.25);
+    }
+
+    .connect-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Error message */
+    .error {
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 18px;
+      font-weight: 500;
+    }
+
+    /* Recent section styling */
+    .recent {
+      margin-top: 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 20px;
+    }
+
+    .recent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text-dim);
+      font-size: 13.5px;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 8px;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    .recent-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      transform: translateX(2px);
+    }
+
+    .recent-item-chevron {
+      font-size: 16px;
+      line-height: 1;
+      transition: transform 0.15s ease;
+    }
+
+    .recent-item:hover .recent-item-chevron {
+      transform: translateX(2px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Background glows -->
+  <div class="bg-glow top-left"></div>
+  <div class="bg-glow bottom-right"></div>
+
+  <!-- Title Bar with Window Controls -->
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-logo">
+      <svg class="logo-svg" viewBox="0 0 32 32">
+        <path d="M16 4C14.5 4 13 5.5 13 7C13 8.5 14.5 10 16 10C17.5 10 19 8.5 19 7C19 5.5 17.5 4 16 4Z"
+          fill="currentColor" />
+        <path d="M9 7C7.5 7 6 8.5 6 10C6 11.5 7.5 13 9 13C10.5 13 12 11.5 12 10C12 8.5 10.5 7 9 7Z"
+          fill="currentColor" />
+        <path d="M23 7C21.5 7 20 8.5 20 10C20 11.5 21.5 13 23 13C24.5 13 26 11.5 26 10C26 8.5 24.5 7 23 7Z"
+          fill="currentColor" />
+        <path d="M16 12C11 12 7 16.5 7 22C7 25 10.5 28 16 28C21.5 28 25 25 25 22C25 16.5 21 12 16 12Z"
+          fill="currentColor" />
+      </svg>
+      <span class="titlebar-title">Stoat</span>
+    </div>
+    <div class="window-controls">
+      <button class="win-btn minimise" id="win-minimise" title="Minimize">
+        <svg viewBox="0 0 10 10">
+          <rect y="5" width="10" height="1" fill="currentColor" />
+        </svg>
       </button>
+      <button class="win-btn maximise" id="win-maximise" title="Maximize">
+        <svg viewBox="0 0 10 10">
+          <rect x="1" y="1" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <button class="win-btn close" id="win-close" title="Close">
+        <svg viewBox="0 0 10 10">
+          <path d="M1 1L9 9M9 1L1 9" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+    </div>
+  </div>
 
-      <div class="divider">or self-hosted</div>
+  <!-- Central card -->
+  <div class="card">
+    <h1>Choose your server</h1>
+    <p class="subtitle">
+      Connect to the official Stoat instance or sign in to your own self-hosted server.
+    </p>
 
-      <span class="label">Server address</span>
-      <input
-        type="text"
-        id="url"
-        placeholder="https://chat.example.com"
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <p class="hint">
-        Enter the URL where your Stoat/Revolt web app is hosted.
-      </p>
-      <div class="error" id="error"></div>
-      <button class="connect-btn" id="connect">Connect</button>
+    <span class="label">Official</span>
+    <button class="official-btn" id="official">
+      <div class="official-left">
+        <div class="official-icon">
+          <svg viewBox="0 0 32 32">
+            <path d="M16 4C14.5 4 13 5.5 13 7C13 8.5 14.5 10 16 10C17.5 10 19 8.5 19 7C19 5.5 17.5 4 16 4Z"
+              fill="currentColor" />
+            <path d="M9 7C7.5 7 6 8.5 6 10C6 11.5 7.5 13 9 13C10.5 13 12 11.5 12 10C12 8.5 10.5 7 9 7Z"
+              fill="currentColor" />
+            <path d="M23 7C21.5 7 20 8.5 20 10C20 11.5 21.5 13 23 13C24.5 13 26 11.5 26 10C26 8.5 24.5 7 23 7Z"
+              fill="currentColor" />
+            <path d="M16 12C11 12 7 16.5 7 22C7 25 10.5 28 16 28C21.5 28 25 25 25 22C25 16.5 21 12 16 12Z"
+              fill="currentColor" />
+          </svg>
+        </div>
+        <div class="official-text">
+          <span class="official-title">Stoat</span>
+          <span class="host" id="official-host"></span>
+        </div>
+      </div>
+      <div class="official-arrow">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" fill="currentColor" />
+        </svg>
+      </div>
+    </button>
 
-      <div class="recent" id="recent-wrap" style="display: none">
-        <span class="label">Recent</span>
-        <div id="recent-list"></div>
+    <div class="divider">or self-hosted</div>
+
+    <span class="label">Server address</span>
+    <div class="input-container">
+      <input type="text" id="url" placeholder="https://chat.example.com" autocomplete="off" spellcheck="false" />
+      <div class="input-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path
+            d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"
+            fill="currentColor" />
+        </svg>
       </div>
     </div>
+    <p class="hint">
+      Enter the URL where your Stoat/Revolt web app is hosted.
+    </p>
+    <div class="error" id="error"></div>
+    <button class="connect-btn" id="connect">Connect</button>
 
-    <script>
-      (function () {
-        const api = window.serverManager;
-        const officialBtn = document.getElementById("official");
-        const officialHost = document.getElementById("official-host");
-        const urlInput = document.getElementById("url");
-        const connectBtn = document.getElementById("connect");
-        const errorEl = document.getElementById("error");
-        const recentWrap = document.getElementById("recent-wrap");
-        const recentList = document.getElementById("recent-list");
+    <div class="recent" id="recent-wrap" style="display: none">
+      <span class="label">Recent Connections</span>
+      <div id="recent-list"></div>
+    </div>
+  </div>
 
-        if (!api) {
-          errorEl.textContent =
-            "Server manager unavailable. Please restart the app.";
+  <script>
+    (function () {
+      const api = window.serverManager;
+      const officialBtn = document.getElementById("official");
+      const officialHost = document.getElementById("official-host");
+      const urlInput = document.getElementById("url");
+      const connectBtn = document.getElementById("connect");
+      const errorEl = document.getElementById("error");
+      const recentWrap = document.getElementById("recent-wrap");
+      const recentList = document.getElementById("recent-list");
+
+      // Window Titlebar elements
+      const titlebar = document.getElementById("titlebar");
+      const winMinimise = document.getElementById("win-minimise");
+      const winMaximise = document.getElementById("win-maximise");
+      const winClose = document.getElementById("win-close");
+
+      // Initialize window controls if running inside Electron frame
+      if (window.native) {
+        document.body.classList.add("has-custom-titlebar");
+        titlebar.style.display = "flex";
+        winMinimise.addEventListener("click", () => window.native.minimise());
+        winMaximise.addEventListener("click", () => window.native.maximise());
+        winClose.addEventListener("click", () => window.native.close());
+      }
+
+      if (!api) {
+        errorEl.textContent =
+          "Server manager unavailable. Please restart the app.";
+        return;
+      }
+
+      const defaultUrl = api.getDefault();
+      try {
+        officialHost.textContent = new URL(defaultUrl).host;
+      } catch (e) {
+        officialHost.textContent = defaultUrl;
+      }
+
+      function normalise(value) {
+        let v = (value || "").trim();
+        if (!v) return null;
+        if (!/^https?:\/\//i.test(v)) {
+          v = "https://" + v;
+        }
+        try {
+          const u = new URL(v);
+          return u.toString().replace(/\/$/, "");
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function select(url) {
+        connectBtn.disabled = true;
+        api.select(url);
+      }
+
+      officialBtn.addEventListener("click", () => select(defaultUrl));
+
+      connectBtn.addEventListener("click", () => {
+        errorEl.textContent = "";
+        const url = normalise(urlInput.value);
+        if (!url) {
+          errorEl.textContent = "Please enter a valid server address.";
           return;
         }
+        select(url);
+      });
 
-        const defaultUrl = api.getDefault();
-        try {
-          officialHost.textContent = new URL(defaultUrl).host;
-        } catch (e) {
-          officialHost.textContent = defaultUrl;
-        }
+      urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") connectBtn.click();
+      });
 
-        function normalise(value) {
-          let v = (value || "").trim();
-          if (!v) return null;
-          if (!/^https?:\/\//i.test(v)) {
-            v = "https://" + v;
-          }
+      const current = api.getCurrent();
+      if (current) {
+        urlInput.value = current;
+      }
+
+      const recent = (api.getRecent() || []).filter(
+        (r) => r && r !== defaultUrl,
+      );
+      if (recent.length) {
+        recentWrap.style.display = "block";
+        recent.forEach((url) => {
+          const btn = document.createElement("button");
+          btn.className = "recent-item";
+          let host = url;
           try {
-            const u = new URL(v);
-            return u.toString().replace(/\/$/, "");
-          } catch (e) {
-            return null;
-          }
-        }
-
-        function select(url) {
-          connectBtn.disabled = true;
-          api.select(url);
-        }
-
-        officialBtn.addEventListener("click", () => select(defaultUrl));
-
-        connectBtn.addEventListener("click", () => {
-          errorEl.textContent = "";
-          const url = normalise(urlInput.value);
-          if (!url) {
-            errorEl.textContent = "Please enter a valid server address.";
-            return;
-          }
-          select(url);
+            host = new URL(url).host;
+          } catch (e) { }
+          btn.innerHTML =
+            "<span>" + host + "</span><span class='recent-item-chevron'>&rsaquo;</span>";
+          btn.addEventListener("click", () => select(url));
+          recentList.appendChild(btn);
         });
+      }
 
-        urlInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") connectBtn.click();
-        });
+      urlInput.focus();
+    })();
+  </script>
+</body>
 
-        const current = api.getCurrent();
-        if (current) {
-          urlInput.value = current;
-        }
-
-        const recent = (api.getRecent() || []).filter(
-          (r) => r && r !== defaultUrl,
-        );
-        if (recent.length) {
-          recentWrap.style.display = "block";
-          recent.forEach((url) => {
-            const btn = document.createElement("button");
-            btn.className = "recent-item";
-            let host = url;
-            try {
-              host = new URL(url).host;
-            } catch (e) {}
-            btn.innerHTML =
-              "<span>" + host + "</span><span>&rsaquo;</span>";
-            btn.addEventListener("click", () => select(url));
-            recentList.appendChild(btn);
-          });
-        }
-
-        urlInput.focus();
-      })();
-    </script>
-  </body>
 </html>
