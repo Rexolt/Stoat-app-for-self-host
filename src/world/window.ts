@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld("native", {
   maximise: () => ipcRenderer.send("maximise"),
   close: () => ipcRenderer.send("close"),
 
+  // whether the frameless custom titlebar should be used
+  useCustomFrame: () => ipcRenderer.sendSync("useCustomFrame") as boolean,
+
   setBadgeCount: (count: number) => ipcRenderer.send("setBadgeCount", count),
 
   onceScreenPicker: (
